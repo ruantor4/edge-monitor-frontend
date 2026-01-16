@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <title>Dashboard – Eventos de Risco</title>
+</head>
+<body>
+
+<h1>Dashboard – Eventos de Risco</h1>
+
+<p id="status">Carregando eventos...</p>
+
+<ul id="eventos"></ul>
+
+<script type="module">
+    import { apiGet } from "./js/api.js";
+    import { getToken, logout } from "./js/auth.js";
+
+    /**
+     * Valida se o usuário está autenticado
+     */
+    if (!getToken()) {
+        console.warn("Usuário não autenticado. Redirecionando...");
+        logout();
+    }
+
+    /**
+     * Carrega eventos de risco da API
+     */
+    async function carregarEventos() {
+        const statusEl = document.getElementById("status");
+        const listaEl = document.getElementById("eventos");
+
+        try {
+            const eventos = await apiGet("/api/monitoring/");
+
+            statusEl.textContent = "Eventos carregados com sucesso";
+
+            // Limpa lista
+            listaEl.innerHTML = "";
+
+            if (!eventos || eventos.length === 0) {
+                statusEl.textContent = "Nenhum evento encontrado";
+                return;
+            }
+
+            eventos.forEach(evento => {
+                const li = document.createElement("li");
+                li.textContent = `
+                    ${evento.detected_at} |
+                    ${evento.detected_class} |
+                    ${evento.mac_address}
+                `;
+                listaEl.appendChild(li);
+            });
+
+        } catch (error) {
+            statusEl.textContent = "Erro ao carregar eventos";
+            console.error("Erro ao carregar eventos:", error);
+        }
+    }
+
+    carregarEventos();
+</script>
+
+</body>
+</html>

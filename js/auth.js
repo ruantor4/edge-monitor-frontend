@@ -9,22 +9,22 @@
  * - Persistir token de acesso
  * - Fornecer verificação de sessão
  * - Realizar logout controlado
+ *
  * O backend é a única fonte de verdade.
  */
+// IMPORTAÇÃO DE CONFIG 
+import { API_CONFIG } from "./config.js";
+
 
 /**
  * Persiste o token JWT no armazenamento local.
  *
  * @param {string} token
- *     Token de acesso JWT retornado pela API.
- *
  * @returns {void}
  */
-
-function saveToken(token){
+function saveToken(token) {
     localStorage.setItem(API_CONFIG.TOKEN_KEY, token);
 }
-
 
 
 /**
@@ -95,3 +95,13 @@ async function login(username, password) {
     const data = await response.json();
     saveToken(data.access);
 }
+
+
+/**
+ * Exportação explícita do módulo
+ */
+export {
+    login,
+    logout,
+    getToken,
+};
