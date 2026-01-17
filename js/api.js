@@ -5,43 +5,65 @@
  *
  * Este módulo encapsula todas as chamadas à API backend,
  * garantindo:
- * - Inclusão automática do token JWT
+ * - Inclusão automática do access token JWT
+ * - Renovação automática do token quando expirado
  * - Tratamento centralizado de erros HTTP
  * - Padronização das requisições fetch
  *
- * Este arquivo NÃO implementa lógica de UI nem autenticação.
- * Atua como uma camada de serviço, equivalente aos services
- * do backend.
+ * IMPORTANTE:
+ * - Este módulo NÃO contém lógica de UI
+ * - Este módulo NÃO gerencia autenticação diretamente
+ * - A lógica de autenticação é delegada ao auth.js
  */
 
-import { API_CONFIG } from "./config.js";
-import { getToken, logout } from "./auth.js";
 
+import { API_CONFIG } from "./config.js";
+import {
+    getAccessToken,
+    ensureValidAccessToken,
+    logout,
+} from "./auth.js";
+
+// FUNÇÃO BASE DE REQUISIÇÃO
 
 /**
  * Executa uma requisição HTTP autenticada para a API.
  *
+ * Estratégia:
+ * - Anexa access token ao header Authorization
+ * - Em caso de 401:
+ *     - tenta renovar o access token
+ *     - repete a requisição uma única vez
+ *     - se falhar, encerra a sessão
+ *
  * @param {string} endpoint
  *     Endpoint relativo da API (ex: "/api/monitoring/")
  *
- * @param {Object} options
+ * @param {RequestInit} options
  *     Opções adicionais do fetch (method, body, headers, etc).
  *
- * @returns {Promise<any>}
- *     Retorna o JSON da resposta em caso de sucesso.
+ * @param {boolean} [retry=true]
+ *     Controle interno para evitar loop infinito
+ *     durante a tentativa de renovação do token.
  *
  * @throws {Error}
  *     Lançada em caso de erro HTTP ou falha de comunicação.
+ *
+ * @returns {Promise<any>}
+ *     Retorna o JSON da resposta em caso de sucesso,
+ *     ou null para respostas 204.
  */
-async function apiRequest(endpoint, options = {}) {
-    const token = getToken();
+async function apiRequest(endpoint, options = {}, retry = true) {
+    /** @type {string|null} */
+    let accessToken = getAccessToken();
 
+    /** @type {Record<string, string>} */
     const headers = {
         ...(options.headers || {}),
     };
 
-    if(token){
-        headers["Authorization"] = `Bearer ${token}`;
+    if (accessToken) {
+        headers["Authorization"] = `Bearer ${accessToken}`;
     }
 
     const response = await fetch(
@@ -52,29 +74,40 @@ async function apiRequest(endpoint, options = {}) {
         }
     );
 
-    // Token expirado ou inválido
-    if (response.status == 401){
-        logout()
-        throw new Error("Sessão expirada ou não autorizada");
+    /**
+     * Access token expirado ou inválido
+     * → tenta renovar e repetir a requisição uma vez
+     */
+    if (response.status === 401 && retry) {
+        try {
+            accessToken = await ensureValidAccessToken();
+
+            headers["Authorization"] = `Bearer ${accessToken}`;
+
+            return apiRequest(endpoint, options, false);
+        } catch (error) {
+            await logout();
+            throw new Error("Sessão expirada ou não autorizada");
+        }
     }
 
-    
     if (!response.ok) {
         const errorText = await response.text();
         throw new Error(
             `Erro ${response.status}: ${errorText || "Falha na requisição"}`
-        )
-
+        );
     }
 
-    // Resposta sem conteúdo 
-    if (response.status == 204){
+    // Resposta sem conteúdo
+    if (response.status === 204) {
         return null;
     }
 
     return response.json();
 }
 
+
+// MÉTODOS HTTP
 
 /**
  * Realiza uma requisição GET autenticada.
@@ -89,6 +122,7 @@ function apiGet(endpoint) {
 }
 
 
+
 /**
  * Realiza uma requisição POST autenticada.
  *
@@ -96,17 +130,18 @@ function apiGet(endpoint) {
  * @param {Object|FormData} data
  * @returns {Promise<any>}
  */
-function apiPost(endpoint, data){
+function apiPost(endpoint, data) {
     const isFormData = data instanceof FormData;
 
     return apiRequest(endpoint, {
         method: "POST",
         headers: isFormData
             ? {}
-            : {"Content-Type": "application/json"},
+            : { "Content-Type": "application/json" },
         body: isFormData ? data : JSON.stringify(data),
     });
 }
+
 
 
 /**
@@ -120,9 +155,9 @@ function apiPut(endpoint, data) {
     return apiRequest(endpoint, {
         method: "PUT",
         headers: {
-            "Content-Type": "application/json", 
+            "Content-Type": "application/json",
         },
-        body: JSON.stringify(data)
+        body: JSON.stringify(data),
     });
 }
 
@@ -133,14 +168,16 @@ function apiPut(endpoint, data) {
  * @param {string} endpoint
  * @returns {Promise<any>}
  */
-
 function apiDelete(endpoint) {
     return apiRequest(endpoint, {
         method: "DELETE",
     });
 }
 
-export{
+/**
+* EXPORTAÇÃO EXPLÍCITA
+*/
+export {
     apiGet,
     apiPost,
     apiPut,

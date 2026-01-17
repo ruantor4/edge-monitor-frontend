@@ -10,51 +10,70 @@
  * - Atualização de usuários
  * - Remoção de usuários
  *
- * Não contém lógica de UI, DOM ou autenticação.
- * Toda comunicação HTTP é delegada à api.js.
+ * IMPORTANTE:
+ * - Este módulo NÃO contém lógica de UI ou DOM
+ * - Este módulo NÃO gerencia autenticação
+ * - Toda comunicação HTTP é delegada à api.js
  */
 
 import { apiGet, apiPost, apiPut, apiDelete } from "./api.js";
 
 /**
- * Representa os dados de um usuário.
+ * Representa os dados públicos de um usuário.
+ *
+ * Estrutura retornada pelo backend:
+ * UserSerializer
  *
  * @typedef {Object} User
  * @property {number} id
+ *     Identificador único do usuário.
  * @property {string} username
+ *     Nome de usuário.
  * @property {string} email
- * @property {boolean} is_active
+ *     Endereço de e-mail do usuário.
+ */
+
+
+/*  
+ * LISTAGEM
  */
 
 /**
- * Lista todos os usuários cadastrados.
+ * Lista todos os usuários cadastrados no sistema.
  *
  * Backend esperado:
- * GET /api/users/
+ * GET /api/user/
  *
  * @returns {Promise<User[]>}
  *     Lista de usuários retornados pelo backend.
  */
 async function listUsers() {
-    // 🔧 ADICIONADO: função estava sendo exportada, mas não existia
     return apiGet("/api/user/");
 }
 
-
+/* 
+ * CONSULTA
+ */
 
 /**
  * Obtém um usuário específico pelo ID.
  *
  * Backend esperado:
- * GET /api/users/{id}/
+ * GET /api/user/{id}/
  *
  * @param {number} userId
+ *     Identificador do usuário.
+ *
  * @returns {Promise<User>}
+ *     Dados do usuário solicitado.
  */
 async function getUserById(userId) {
     return apiGet(`/api/user/${userId}/`);
 }
 
+/*
+ * CRIAÇÃO
+*/
 
 
 
@@ -62,51 +81,82 @@ async function getUserById(userId) {
  * Cria um novo usuário.
  *
  * Backend esperado:
- * POST /api/users/
+ * POST /api/user/
+ *
+ * Payload esperado:
+ * {
+ *   username: string,
+ *   password: string,
+ *   email?: string
+ * }
  *
  * @param {Object} data
  * @param {string} data.username
+ *     Nome de usuário.
  * @param {string} data.password
+ *     Senha do usuário.
  * @param {string} [data.email]
+ *     E-mail do usuário (opcional).
  *
  * @returns {Promise<User>}
+ *     Usuário criado.
  */
 async function createUser(data) {
     return apiPost("/api/user/", data);
 }
 
 
+/*
+ * ATUALIZAÇÃO
+ */
+
 /**
  * Atualiza um usuário existente.
  *
  * Backend esperado:
- * PUT /api/users/{id}/
+ * PUT /api/user/{id}/
+ *
+ * Payload aceito:
+ * {
+ *   username?: string,
+ *   email?: string,
+ *   password?: string
+ * }
  *
  * @param {number} userId
+ *     Identificador do usuário.
  * @param {Object} data
+ *     Dados a serem atualizados.
+ *
  * @returns {Promise<User>}
+ *     Usuário atualizado.
  */
 async function updateUser(userId, data) {
     return apiPut(`/api/user/${userId}/`, data);
 }
 
 
+/* 
+ * REMOÇÃO
+ */
+
 /**
- * Remove um usuário.
+ * Remove um usuário do sistema.
  *
  * Backend esperado:
- * DELETE /api/users/{id}/
+ * DELETE /api/user/{id}/
  *
  * @param {number} userId
+ *     Identificador do usuário.
+ *
  * @returns {Promise<void>}
  */
 async function deleteUser(userId) {
     return apiDelete(`/api/user/${userId}/`);
 }
 
-
-/**
- * Exportação explícita do domínio de usuários
+/* 
+ * EXPORTAÇÃO EXPLÍCITA
  */
 export {
     listUsers,
@@ -115,5 +165,4 @@ export {
     updateUser,
     deleteUser,
 };
-
 

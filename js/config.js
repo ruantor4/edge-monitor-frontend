@@ -8,6 +8,7 @@
  */
 
 export const API_CONFIG = {
-    BASE_URL: "http://127.0.0.1:8000",
-    TOKEN_KEY: "access_token",
+    BASE_URL: "http://localhost:8000",
+    ACCESS_TOKEN_KEY: "edge_monitor_access",
+    RENOVATE_TOKEN_KEY: "edge_monitor_renovate",
 };

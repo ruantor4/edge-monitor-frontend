@@ -1,23 +1,108 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <title>Teste Config / Auth</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Edge Monitor | Login</title>
+
+    <!-- Estilos globais -->
+    <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
 
-<h1>Teste Config / Auth</h1>
+    <!-- ======================================================
+         CONTAINER PRINCIPAL
+    ======================================================= -->
+    <main class="login-container">
 
-<script type="module">
-    import { API_CONFIG } from "./js/config.js";
-    import { login, getToken } from "./js/auth.js";
+        <!-- LOGO / IDENTIDADE -->
+        <section class="login-header">
+            <img
+                src="assets/logo.png"
+                alt="Edge Monitor"
+                class="login-logo"
+            />
+            <h1>Edge Monitor</h1>
+            <p>Autenticação de acesso</p>
+        </section>
 
-    console.log("Config carregada:", API_CONFIG);
-    console.log("Token antes:", getToken());
+        <!-- FORMULÁRIO DE LOGIN -->
+        <section class="login-form-section">
+            <form id="login-form" novalidate>
 
-    await login("admin", "admin");
+                <div class="form-group">
+                    <label for="username">Usuário</label>
+                    <input
+                        type="text"
+                        id="username"
+                        name="username"
+                        required
+                        autocomplete="username"
+                        placeholder="Digite seu usuário"
+                    />
+                </div>
 
-    console.log("Token depois:", getToken());
-</script>
+                <div class="form-group">
+                    <label for="password">Senha</label>
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        required
+                        autocomplete="current-password"
+                        placeholder="Digite sua senha"
+                    />
+                </div>
+
+                <!-- MENSAGEM DE ERRO -->
+                <div
+                    id="login-error"
+                    class="form-error"
+                    aria-live="polite"
+                ></div>
+
+                <button type="submit" class="btn-primary">
+                    Entrar
+                </button>
+
+            </form>
+        </section>
+
+    </main>
+
+    <!-- ======================================================
+         SCRIPT DE CONTROLE DA TELA (UI)
+         - NÃO é domínio
+         - NÃO é auth
+         - Apenas orquestra a tela
+    ======================================================= -->
+    <script type="module">
+        import { login } from "./js/auth.js";
+
+        const form = document.getElementById("login-form");
+        const errorBox = document.getElementById("login-error");
+
+        form.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            errorBox.textContent = "";
+
+            const username = form.username.value.trim();
+            const password = form.password.value.trim();
+
+            if (!username || !password) {
+                errorBox.textContent = "Usuário e senha são obrigatórios";
+                return;
+            }
+
+            try {
+                await login(username, password);
+                window.location.href = "dashboard.html";
+            } catch (error) {
+                errorBox.textContent = "Credenciais inválidas";
+            }
+        });
+    </script>
+
 </body>
 </html>
