@@ -2,66 +2,190 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8" />
-    <title>Dashboard – Eventos de Risco</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Edge Monitor | Dashboard</title>
+
+    <!-- BOOTSTRAP (BASE DE LAYOUT) -->
+    <link rel="stylesheet" href="css/bootstrap.min.css" />
+
+    <!-- CSS DO PROJETO (OVERRIDES E IDENTIDADE – SERÁ TRATADO DEPOIS) -->
+    <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
 
-<h1>Dashboard – Eventos de Risco</h1>
+    <!--
+         CABEÇALHO
+    -->
+    <header class="app-header container-fluid py-3 border-bottom">
+        <div class="d-flex justify-content-between align-items-center">
+            <h1 class="h4 mb-0">Edge Monitor</h1>
 
-<p id="status">Carregando eventos...</p>
+            <nav aria-label="Ações do usuário" class="d-flex gap-3">
+                <a href="dashboard.html" class="btn btn-outline-secondary btn-sm">
+                    Dashboard
+                </a>
+                <a href="users.html" class="btn btn-outline-secondary btn-sm">
+                    Usuários
+                </a>
+                <button id="logout-btn" class="btn btn-danger btn-sm">
+                    Sair
+                </button>
+            </nav>
+        </div>
+    </header>
 
-<ul id="eventos"></ul>
+    <!--
+         CONTEÚDO PRINCIPAL
+    -->
+    <main class="dashboard-container container my-4">
 
-<script type="module">
-    import { apiGet } from "./js/api.js";
-    import { getToken, logout } from "./js/auth.js";
+        <!-- FILTROS -->
+        <section class="filters-section mb-4">
+            <h2 class="h5 mb-3">Filtros</h2>
 
-    /**
-     * Valida se o usuário está autenticado
-     */
-    if (!getToken()) {
-        console.warn("Usuário não autenticado. Redirecionando...");
-        logout();
-    }
+            <form id="filters-form" class="row g-3 align-items-end" novalidate>
+                <div class="col-md-4">
+                    <label class="form-label">
+                        Data inicial
+                        <input type="date" name="start_date" class="form-control" required />
+                    </label>
+                </div>
 
-    /**
-     * Carrega eventos de risco da API
-     */
-    async function carregarEventos() {
-        const statusEl = document.getElementById("status");
-        const listaEl = document.getElementById("eventos");
+                <div class="col-md-4">
+                    <label class="form-label">
+                        Data final
+                        <input type="date" name="end_date" class="form-control" required />
+                    </label>
+                </div>
 
-        try {
-            const eventos = await apiGet("/api/monitoring/");
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-primary w-100">
+                        Buscar
+                    </button>
+                </div>
+            </form>
 
-            statusEl.textContent = "Eventos carregados com sucesso";
+            <p id="filters-error" class="text-danger mt-2" aria-live="polite"></p>
+        </section>
 
-            // Limpa lista
-            listaEl.innerHTML = "";
+        <!-- 
+            RESULTADOS 
+        -->
+        <section class="results-section">
+            <h2 class="h5 mb-3">Ocorrências</h2>
 
-            if (!eventos || eventos.length === 0) {
-                statusEl.textContent = "Nenhum evento encontrado";
+            <div class="table-responsive">
+                <table class="table table-striped align-middle">
+                    <thead>
+                        <tr>
+                            <th>MAC</th>
+                            <th>Classe</th>
+                            <th>Data/Hora</th>
+                            <th>Evidência</th>
+                        </tr>
+                    </thead>
+                    <tbody id="events-container">
+                        <!-- Linhas renderizadas via JS -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <!--
+         MODAL DE IMAGEM (HTML PURO)
+    -->
+    <dialog id="image-modal">
+        <img id="modal-image" alt="Evidência ampliada" />
+    </dialog>
+
+    <!--
+         SCRIPT DE UI (ORQUESTRAÇÃO DA TELA)
+    -->
+    <script type="module">
+        import { listDashboardEvents } from "./js/events.js";
+        import { logout } from "./js/auth.js";
+
+        const form = document.getElementById("filters-form");
+        const errorBox = document.getElementById("filters-error");
+        const tableBody = document.getElementById("events-container");
+        const logoutBtn = document.getElementById("logout-btn");
+
+        const modal = document.getElementById("image-modal");
+        const modalImage = document.getElementById("modal-image");
+
+        // Logout
+        logoutBtn.addEventListener("click", () => {
+            logout();
+        });
+
+        // Buscar eventos
+        form.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            errorBox.textContent = "";
+            tableBody.innerHTML = "";
+
+            const startDate = form.start_date.value;
+            const endDate = form.end_date.value;
+
+            if (!startDate || !endDate) {
+                errorBox.textContent =
+                    "Data inicial e data final são obrigatórias";
                 return;
             }
 
-            eventos.forEach(evento => {
-                const li = document.createElement("li");
-                li.textContent = `
-                    ${evento.detected_at} |
-                    ${evento.detected_class} |
-                    ${evento.mac_address}
-                `;
-                listaEl.appendChild(li);
-            });
+            try {
+                const events = await listDashboardEvents(startDate, endDate);
 
-        } catch (error) {
-            statusEl.textContent = "Erro ao carregar eventos";
-            console.error("Erro ao carregar eventos:", error);
-        }
-    }
+                if (!events || events.length === 0) {
+                    const row = document.createElement("tr");
+                    row.innerHTML =
+                        `<td colspan="4">Nenhuma ocorrência encontrada.</td>`;
+                    tableBody.appendChild(row);
+                    return;
+                }
 
-    carregarEventos();
-</script>
+                events.forEach((event) => {
+                    const row = document.createElement("tr");
+
+                    row.innerHTML = `
+                        <td>${event.mac}</td>
+                        <td>${event.class_name}</td>
+                        <td>${new Date(event.datetime).toLocaleString()}</td>
+                        <td>
+                            <img
+                                src="${event.image}"
+                                alt="Evidência do evento"
+                                width="80"
+                                style="cursor: pointer"
+                                data-full="${event.image}"
+                            />
+                        </td>
+                    `;
+
+                    tableBody.appendChild(row);
+                });
+            } catch (error) {
+                errorBox.textContent =
+                    "Erro ao consultar eventos. Sessão pode ter expirado.";
+            }
+        });
+
+        // Abrir imagem em tamanho real
+        tableBody.addEventListener("click", (event) => {
+            if (event.target.tagName === "IMG") {
+                modalImage.src = event.target.dataset.full;
+                modal.showModal();
+            }
+        });
+
+        // Fechar modal ao clicar
+        modal.addEventListener("click", () => {
+            modal.close();
+        });
+    </script>
 
 </body>
 </html>
