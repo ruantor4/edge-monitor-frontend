@@ -2,66 +2,157 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8" />
-    <title>Teste – Usuários</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Edge Monitor | Usuários</title>
+
+    <!-- BOOTSTRAP (BASE DE LAYOUT) -->
+    <link rel="stylesheet" href="css/bootstrap.min.css" />
+
+    <!-- ESTILOS GLOBAIS DO PROJETO -->
+    <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
 
-<h1>Teste de Usuários (Frontend)</h1>
+    <!-- 
+         CONTEÚDO PRINCIPAL
+     -->
+    <main class="users-container container my-4">
 
-<p id="status">Carregando usuários...</p>
+        <!-- CABEÇALHO DA PÁGINA -->
+        <header class="page-header mb-4">
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+                <div>
+                    <h1 class="h4 mb-1">Gestão de Usuários</h1>
+                    <p class="text-muted mb-0">
+                        Listagem e administração de usuários do sistema
+                    </p>
+                </div>
 
-<ul id="users-list"></ul>
+                <nav class="page-actions" aria-label="Ações de usuários">
+                    <a href="user-form.html" class="btn btn-primary">
+                        Novo Usuário
+                    </a>
+                </nav>
+            </div>
+        </header>
 
-<script type="module">
-    import { listUsers } from "./js/users.js";
-    import { getToken, logout } from "./js/auth.js";
+        <!-- LISTAGEM DE USUÁRIOS -->
+        <section class="users-list-section">
+            <h2 class="visually-hidden">Lista de usuários</h2>
 
-    /**
-     * Validação simples de autenticação
-     */
-    if (!getToken()) {
-        console.warn("Usuário não autenticado. Redirecionando...");
-        logout();
-    }
+            <div class="table-responsive">
+                <table class="table table-striped align-middle">
+                    <thead>
+                        <tr>
+                            <th scope="col">ID</th>
+                            <th scope="col">Usuário</th>
+                            <th scope="col">E-mail</th>
+                            <th scope="col">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-table-body">
+                        <!-- Conteúdo gerado dinamicamente -->
+                    </tbody>
+                </table>
+            </div>
 
-    /**
-     * Carrega usuários do backend
-     */
-    async function carregarUsuarios() {
-        const statusEl = document.getElementById("status");
-        const listEl = document.getElementById("users-list");
+            <!-- ESTADO VAZIO / ERRO -->
+            <p
+                id="users-empty"
+                class="text-muted mt-3"
+                hidden
+            >
+                Nenhum usuário encontrado.
+            </p>
+        </section>
 
-        try {
-            const users = await listUsers();
+    </main>
 
-            listEl.innerHTML = "";
+    <!-- 
+         SCRIPT DE CONTROLE DA TELA (UI)
+         - Apenas orquestra users.js
+     -->
+    <script type="module">
+        import {
+            listUsers,
+            deleteUser
+        } from "./js/users.js";
 
-            if (!users || users.length === 0) {
-                statusEl.textContent = "Nenhum usuário encontrado";
-                return;
+        const tableBody = document.getElementById("users-table-body");
+        const emptyMessage = document.getElementById("users-empty");
+
+        /**
+         * Renderiza a tabela de usuários
+         */
+        async function loadUsers() {
+            try {
+                const users = await listUsers();
+
+                if (!users.length) {
+                    emptyMessage.hidden = false;
+                    return;
+                }
+
+                users.forEach((user) => {
+                    const row = document.createElement("tr");
+
+                    row.innerHTML = `
+                        <td>${user.id}</td>
+                        <td>${user.username}</td>
+                        <td>${user.email || "-"}</td>
+                        <td class="d-flex gap-2">
+                            <a
+                                href="user-form.html?id=${user.id}"
+                                class="btn btn-outline-secondary btn-sm"
+                            >
+                                Editar
+                            </a>
+                            <button
+                                class="btn btn-danger btn-sm"
+                                data-id="${user.id}"
+                            >
+                                Excluir
+                            </button>
+                        </td>
+                    `;
+
+                    tableBody.appendChild(row);
+                });
+
+            } catch (error) {
+                emptyMessage.textContent =
+                    "Erro ao carregar usuários.";
+                emptyMessage.hidden = false;
             }
-
-            statusEl.textContent = "Usuários carregados com sucesso";
-
-            users.forEach(user => {
-                const li = document.createElement("li");
-                li.textContent = `
-                    ID: ${user.id} |
-                    Username: ${user.username} |
-                    Email: ${user.email || "-"} |
-                    Ativo: ${user.is_active}
-                `;
-                listEl.appendChild(li);
-            });
-
-        } catch (error) {
-            statusEl.textContent = "Erro ao carregar usuários";
-            console.error("Erro:", error);
         }
-    }
 
-    carregarUsuarios();
-</script>
+        /**
+         * Ação de exclusão
+         */
+        tableBody.addEventListener("click", async (event) => {
+            const button = event.target;
+
+            if (!button.matches("button[data-id]")) return;
+
+            const userId = button.dataset.id;
+
+            const confirmed = confirm(
+                "Tem certeza que deseja excluir este usuário?"
+            );
+
+            if (!confirmed) return;
+
+            try {
+                await deleteUser(userId);
+                window.location.reload();
+            } catch (error) {
+                alert("Erro ao excluir usuário");
+            }
+        });
+
+        loadUsers();
+    </script>
 
 </body>
 </html>
