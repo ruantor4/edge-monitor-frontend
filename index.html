@@ -6,77 +6,97 @@
 
     <title>Edge Monitor | Login</title>
 
-    <!-- Estilos globais -->
+    <!-- BOOTSTRAP (BASE DE LAYOUT) -->
+    <link rel="stylesheet" href="css/bootstrap.min.css" />
+
+    <!-- ESTILOS DO PROJETO (SERÁ TRATADO DEPOIS) -->
     <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
 
-    <!-- ======================================================
+    <!-- 
          CONTAINER PRINCIPAL
-    ======================================================= -->
-    <main class="login-container">
+    -->
+    <main class="login-container container min-vh-100 d-flex justify-content-center align-items-center">
 
-        <!-- LOGO / IDENTIDADE -->
-        <section class="login-header">
-            <img
-                src="assets/logo.png"
-                alt="Edge Monitor"
-                class="login-logo"
-            />
-            <h1>Edge Monitor</h1>
-            <p>Autenticação de acesso</p>
-        </section>
+        <div class="row w-100 justify-content-center">
+            <div class="col-12 col-sm-10 col-md-6 col-lg-4">
 
-        <!-- FORMULÁRIO DE LOGIN -->
-        <section class="login-form-section">
-            <form id="login-form" novalidate>
-
-                <div class="form-group">
-                    <label for="username">Usuário</label>
-                    <input
-                        type="text"
-                        id="username"
-                        name="username"
-                        required
-                        autocomplete="username"
-                        placeholder="Digite seu usuário"
+                <!-- 
+                    LOGO / IDENTIDADE 
+                -->
+                <section class="login-header text-center mb-4">
+                    <img
+                        src="assets/logo.png"
+                        alt="Edge Monitor"
+                        class="login-logo img-fluid mb-3"
+                        style="max-height: 80px;"
                     />
-                </div>
+                    <h1 class="h4 mb-1">Edge Monitor</h1>
+                    <p class="text-muted mb-0">Autenticação de acesso</p>
+                </section>
 
-                <div class="form-group">
-                    <label for="password">Senha</label>
-                    <input
-                        type="password"
-                        id="password"
-                        name="password"
-                        required
-                        autocomplete="current-password"
-                        placeholder="Digite sua senha"
-                    />
-                </div>
+                <!-- 
+                    FORMULÁRIO DE LOGIN 
+                -->
+                <section class="login-form-section">
+                    <form id="login-form" novalidate>
 
-                <!-- MENSAGEM DE ERRO -->
-                <div
-                    id="login-error"
-                    class="form-error"
-                    aria-live="polite"
-                ></div>
+                        <div class="mb-3">
+                            <label for="username" class="form-label">
+                                Usuário
+                            </label>
+                            <input
+                                type="text"
+                                id="username"
+                                name="username"
+                                class="form-control"
+                                required
+                                autocomplete="username"
+                                placeholder="Digite seu usuário"
+                            />
+                        </div>
 
-                <button type="submit" class="btn-primary">
-                    Entrar
-                </button>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">
+                                Senha
+                            </label>
+                            <input
+                                type="password"
+                                id="password"
+                                name="password"
+                                class="form-control"
+                                required
+                                autocomplete="current-password"
+                                placeholder="Digite sua senha"
+                            />
+                        </div>
 
-            </form>
-        </section>
+                        <!-- 
+                            MENSAGEM DE ERRO 
+                        -->
+                        <div
+                            id="login-error"
+                            class="text-danger mb-3"
+                            aria-live="polite"
+                        ></div>
+
+                        <button type="submit" class="btn btn-primary w-100">
+                            Entrar
+                        </button>
+
+                    </form>
+                </section>
+
+            </div>
+        </div>
 
     </main>
 
-    <!-- ======================================================
+    <!-- 
          SCRIPT DE CONTROLE DA TELA (UI)
-         - NÃO é domínio
-         - NÃO é auth
          - Apenas orquestra a tela
-    ======================================================= -->
+    -->
     <script type="module">
         import { login } from "./js/auth.js";
 
