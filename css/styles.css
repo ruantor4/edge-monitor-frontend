@@ -192,6 +192,61 @@ body {
 }
 
 /* =========================================================
+   USER FORM – CRIAÇÃO / EDIÇÃO DE USUÁRIO
+   ========================================================= */
+
+.user-form-container {
+    max-width: 600px;
+}
+
+.user-form-section {
+    background-color: #ffffff;
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.user-form-section .form-label {
+    font-weight: 500;
+}
+
+.user-form-section input {
+    padding: 0.55rem 0.75rem;
+}
+
+
+/* -----------------------------
+   CABEÇALHO DO FORMULÁRIO
+------------------------------ */
+
+.user-form-container .page-header h1 {
+    font-weight: 600;
+    color: #0d1b2a;
+}
+
+.user-form-container .page-header p {
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+
+/* -----------------------------
+   AÇÕES DO FORMULÁRIO
+------------------------------ */
+
+.user-form-section .btn {
+    min-width: 110px;
+}
+
+
+/* -----------------------------
+   FEEDBACK / ERROS
+------------------------------ */
+
+#form-error {
+    font-size: 0.9rem;
+}
+/* =========================================================
    MODAL DE IMAGEM
    ========================================================= */
 

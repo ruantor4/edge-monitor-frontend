@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Edge Monitor | Usuário</title>
+
+    <!-- BOOTSTRAP (BASE DE LAYOUT) -->
+    <link rel="stylesheet" href="css/bootstrap.min.css" />
+
+    <!-- ESTILOS GLOBAIS DO PROJETO -->
+    <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+    <!--
+         CONTEÚDO PRINCIPAL
+    -->
+    <main class="user-form-container container my-4">
+
+        <!--
+             CABEÇALHO DA PÁGINA
+        -->
+        <header class="page-header mb-4">
+            <h1 id="page-title" class="h4 mb-1">
+                Novo Usuário
+            </h1>
+            <p
+                id="page-description"
+                class="text-muted mb-0"
+            >
+                Cadastro de usuário no sistema
+            </p>
+        </header>
+
+        <!--
+             FORMULÁRIO DE USUÁRIO
+        -->
+        <section class="user-form-section">
+            <form id="user-form" novalidate>
+
+                <div class="mb-3">
+                    <label for="username" class="form-label">
+                        Usuário
+                    </label>
+                    <input
+                        type="text"
+                        id="username"
+                        name="username"
+                        class="form-control"
+                        required
+                        autocomplete="username"
+                    />
+                </div>
+
+                <div class="mb-3">
+                    <label for="email" class="form-label">
+                        E-mail
+                    </label>
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        class="form-control"
+                        autocomplete="email"
+                    />
+                </div>
+
+                <div class="mb-3">
+                    <label for="password" class="form-label">
+                        Senha
+                        <span
+                            id="password-hint"
+                            class="text-muted ms-1"
+                        ></span>
+                    </label>
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        class="form-control"
+                        autocomplete="new-password"
+                    />
+                </div>
+
+                <!--
+                     MENSAGEM DE ERRO
+                -->
+                <div
+                    id="form-error"
+                    class="text-danger mb-3"
+                    aria-live="polite"
+                ></div>
+
+                <!--
+                     AÇÕES DO FORMULÁRIO
+                -->
+                <div class="d-flex gap-2">
+                    <button
+                        type="submit"
+                        class="btn btn-primary"
+                    >
+                        Salvar
+                    </button>
+
+                    <a
+                        href="users.html"
+                        class="btn btn-outline-secondary"
+                    >
+                        Cancelar
+                    </a>
+                </div>
+
+            </form>
+        </section>
+
+    </main>
+
+    <!--
+         SCRIPT DE CONTROLE DA TELA (UI)
+         - Apenas orquestra users.js
+    -->
+    <script type="module">
+        import {
+            createUser,
+            updateUser,
+            getUserById
+        } from "./js/users.js";
+
+        const form = document.getElementById("user-form");
+        const errorBox = document.getElementById("form-error");
+        const title = document.getElementById("page-title");
+        const description = document.getElementById("page-description");
+        const passwordHint = document.getElementById("password-hint");
+
+        const params = new URLSearchParams(window.location.search);
+        const userId = params.get("id");
+
+        /**
+         * Modo edição
+         */
+        if (userId) {
+            title.textContent = "Editar Usuário";
+            description.textContent =
+                "Atualização de dados do usuário";
+            passwordHint.textContent =
+                "(deixe em branco para manter a senha atual)";
+
+            loadUser(userId);
+        }
+
+        /**
+         * Carrega dados do usuário para edição
+         */
+        async function loadUser(id) {
+            try {
+                const user = await getUserById(id);
+                form.username.value = user.username;
+                form.email.value = user.email || "";
+            } catch (error) {
+                errorBox.textContent =
+                    "Erro ao carregar dados do usuário";
+            }
+        }
+
+        /**
+         * Submissão do formulário
+         */
+        form.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            errorBox.textContent = "";
+
+            const payload = {
+                username: form.username.value.trim(),
+                email: form.email.value.trim() || undefined,
+            };
+
+            const password = form.password.value.trim();
+            if (password) {
+                payload.password = password;
+            }
+
+            try {
+                if (userId) {
+                    await updateUser(userId, payload);
+                } else {
+                    if (!payload.password) {
+                        errorBox.textContent =
+                            "Senha é obrigatória para novo usuário";
+                        return;
+                    }
+                    await createUser(payload);
+                }
+
+                window.location.href = "users.html";
+            } catch (error) {
+                errorBox.textContent =
+                    "Erro ao salvar usuário";
+            }
+        });
+    </script>
+
+</body>
+</html>
