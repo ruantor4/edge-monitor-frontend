@@ -6,186 +6,228 @@
 
     <title>Edge Monitor | Dashboard</title>
 
-    <!-- BOOTSTRAP (BASE DE LAYOUT) -->
-    <link rel="stylesheet" href="css/bootstrap.min.css" />
+    <!-- Bootstrap -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    />
 
-    <!-- CSS DO PROJETO (OVERRIDES E IDENTIDADE – SERÁ TRATADO DEPOIS) -->
+    <!-- CSS do projeto -->
     <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
 
-    <!--
-         CABEÇALHO
-    -->
-    <header class="app-header container-fluid py-3 border-bottom">
-        <div class="d-flex justify-content-between align-items-center">
-            <h1 class="h4 mb-0">Edge Monitor</h1>
+<!-- ======================================================
+     HEADER GLOBAL
+====================================================== -->
+<header class="app-header">
+    <h1>Edge Monitor</h1>
 
-            <nav aria-label="Ações do usuário" class="d-flex gap-3">
-                <a href="dashboard.html" class="btn btn-outline-secondary btn-sm">
-                    Dashboard
-                </a>
-                <a href="users.html" class="btn btn-outline-secondary btn-sm">
-                    Usuários
-                </a>
-                <button id="logout-btn" class="btn btn-danger btn-sm">
-                    Sair
-                </button>
-            </nav>
-        </div>
-    </header>
+    <nav aria-label="Navegação principal">
+        <a href="dashboard.html">Dashboard</a>
+        <a href="users.html">Usuários</a>
+        <button id="logout-btn">Sair</button>
+    </nav>
+</header>
 
-    <!--
-         CONTEÚDO PRINCIPAL
-    -->
-    <main class="dashboard-container container my-4">
+<!-- ======================================================
+     CONTEÚDO PRINCIPAL
+====================================================== -->
+<main class="container dashboard-container">
 
-        <!-- FILTROS -->
-        <section class="filters-section mb-4">
-            <h2 class="h5 mb-3">Filtros</h2>
+    <!-- TÍTULO -->
+    <section class="mb-4">
+        <h2 class="fw-semibold">Dashboard</h2>
+        <p class="text-muted mb-0">
+            Consulta de ocorrências de monitoramento
+        </p>
+    </section>
 
-            <form id="filters-form" class="row g-3 align-items-end" novalidate>
-                <div class="col-md-4">
-                    <label class="form-label">
-                        Data inicial
-                        <input type="date" name="start_date" class="form-control" required />
-                    </label>
+    <!-- ==================================================
+         MÉTRICAS
+    =================================================== -->
+    <section class="metrics-section mb-4">
+        <div class="row g-3">
+            <div class="col-md-3">
+                <div class="metric-card">
+                    <span>Total</span>
+                    <strong id="metric-total">0</strong>
                 </div>
-
-                <div class="col-md-4">
-                    <label class="form-label">
-                        Data final
-                        <input type="date" name="end_date" class="form-control" required />
-                    </label>
-                </div>
-
-                <div class="col-md-4">
-                    <button type="submit" class="btn btn-primary w-100">
-                        Buscar
-                    </button>
-                </div>
-            </form>
-
-            <p id="filters-error" class="text-danger mt-2" aria-live="polite"></p>
-        </section>
-
-        <!-- 
-            RESULTADOS 
-        -->
-        <section class="results-section">
-            <h2 class="h5 mb-3">Ocorrências</h2>
-
-            <div class="table-responsive">
-                <table class="table table-striped align-middle">
-                    <thead>
-                        <tr>
-                            <th>MAC</th>
-                            <th>Classe</th>
-                            <th>Data/Hora</th>
-                            <th>Evidência</th>
-                        </tr>
-                    </thead>
-                    <tbody id="events-container">
-                        <!-- Linhas renderizadas via JS -->
-                    </tbody>
-                </table>
             </div>
-        </section>
 
-    </main>
+            <div class="col-md-3">
+                <div class="metric-card">
+                    <span>Críticos</span>
+                    <strong id="metric-critical">0</strong>
+                </div>
+            </div>
 
-    <!--
-         MODAL DE IMAGEM (HTML PURO)
-    -->
-    <dialog id="image-modal">
-        <img id="modal-image" alt="Evidência ampliada" />
-    </dialog>
+            <div class="col-md-3">
+                <div class="metric-card">
+                    <span>Normais</span>
+                    <strong id="metric-normal">0</strong>
+                </div>
+            </div>
 
-    <!--
-         SCRIPT DE UI (ORQUESTRAÇÃO DA TELA)
-    -->
-    <script type="module">
-        import { listDashboardEvents } from "./js/events.js";
-        import { logout } from "./js/auth.js";
+            <div class="col-md-3">
+                <div class="metric-card">
+                    <span>Último evento</span>
+                    <strong id="metric-last">—</strong>
+                </div>
+            </div>
+        </div>
+    </section>
 
-        const form = document.getElementById("filters-form");
-        const errorBox = document.getElementById("filters-error");
-        const tableBody = document.getElementById("events-container");
-        const logoutBtn = document.getElementById("logout-btn");
+    <!-- ==================================================
+         FILTROS
+    =================================================== -->
+    <section class="filters-section mb-4">
+        <h3 class="h6 fw-semibold mb-3">Filtros</h3>
 
-        const modal = document.getElementById("image-modal");
-        const modalImage = document.getElementById("modal-image");
+        <form id="filters-form" novalidate>
+            <div>
+                <label>
+                    Data inicial
+                    <input type="date" name="start_date" required />
+                </label>
+            </div>
 
-        // Logout
-        logoutBtn.addEventListener("click", () => {
-            logout();
-        });
+            <div>
+                <label>
+                    Data final
+                    <input type="date" name="end_date" required />
+                </label>
+            </div>
 
-        // Buscar eventos
-        form.addEventListener("submit", async (event) => {
-            event.preventDefault();
-            errorBox.textContent = "";
-            tableBody.innerHTML = "";
+            <button type="submit">
+                Buscar
+            </button>
+        </form>
 
-            const startDate = form.start_date.value;
-            const endDate = form.end_date.value;
+        <p id="filters-error" aria-live="polite"></p>
+    </section>
 
-            if (!startDate || !endDate) {
-                errorBox.textContent =
-                    "Data inicial e data final são obrigatórias";
+    <!-- ==================================================
+         RESULTADOS
+    =================================================== -->
+    <section class="results-section">
+        <h3 class="h6 fw-semibold mb-3">Ocorrências</h3>
+
+        <div id="events-container" class="events-list"></div>
+    </section>
+
+</main>
+
+<!-- ======================================================
+     MODAL DE IMAGEM
+====================================================== -->
+<dialog id="image-modal">
+    <img id="modal-image" alt="Evidência ampliada" />
+</dialog>
+
+<!-- ======================================================
+     SCRIPTS
+====================================================== -->
+<script type="module">
+    import { listDashboardEvents } from "./js/events.js";
+    import { logout } from "./js/auth.js";
+
+    const form = document.getElementById("filters-form");
+    const errorBox = document.getElementById("filters-error");
+    const container = document.getElementById("events-container");
+    const logoutBtn = document.getElementById("logout-btn");
+
+    const modal = document.getElementById("image-modal");
+    const modalImage = document.getElementById("modal-image");
+
+    logoutBtn.addEventListener("click", () => logout());
+
+    form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        errorBox.textContent = "";
+        container.innerHTML = "";
+
+        const startDate = form.start_date.value;
+        const endDate = form.end_date.value;
+
+        if (!startDate || !endDate) {
+            errorBox.textContent =
+                "Data inicial e data final são obrigatórias";
+            return;
+        }
+
+        try {
+            const events = await listDashboardEvents(startDate, endDate);
+
+            document.getElementById("metric-total").textContent = events.length;
+
+            const critical = events.filter(
+                e => e.class_name === "CRITICAL"
+            ).length;
+
+            document.getElementById("metric-critical").textContent = critical;
+            document.getElementById("metric-normal").textContent =
+                events.length - critical;
+
+            document.getElementById("metric-last").textContent =
+                events.length
+                    ? new Date(events[0].datetime).toLocaleString()
+                    : "—";
+
+            if (!events.length) {
+                container.innerHTML =
+                    `<div class="text-muted">Nenhuma ocorrência encontrada.</div>`;
                 return;
             }
 
-            try {
-                const events = await listDashboardEvents(startDate, endDate);
+            events.forEach(event => {
+                const card = document.createElement("div");
+                card.className = "event-card";
 
-                if (!events || events.length === 0) {
-                    const row = document.createElement("tr");
-                    row.innerHTML =
-                        `<td colspan="4">Nenhuma ocorrência encontrada.</td>`;
-                    tableBody.appendChild(row);
-                    return;
-                }
+                card.innerHTML = `
+                    <div class="event-image">
+                        <img
+                            src="${event.image}"
+                            alt="Evidência"
+                            data-full="${event.image}"
+                        />
+                    </div>
 
-                events.forEach((event) => {
-                    const row = document.createElement("tr");
+                    <div class="event-info">
+                        <span class="badge ${
+                            event.class_name === "CRITICAL"
+                                ? "bg-danger"
+                                : "bg-secondary"
+                        }">
+                            ${event.class_name}
+                        </span>
 
-                    row.innerHTML = `
-                        <td>${event.mac}</td>
-                        <td>${event.class_name}</td>
-                        <td>${new Date(event.datetime).toLocaleString()}</td>
-                        <td>
-                            <img
-                                src="${event.image}"
-                                alt="Evidência do evento"
-                                width="80"
-                                style="cursor: pointer"
-                                data-full="${event.image}"
-                            />
-                        </td>
-                    `;
+                        <div class="event-mac">${event.mac}</div>
+                        <div class="event-date">
+                            ${new Date(event.datetime).toLocaleString()}
+                        </div>
+                    </div>
+                `;
 
-                    tableBody.appendChild(row);
-                });
-            } catch (error) {
-                errorBox.textContent =
-                    "Erro ao consultar eventos. Sessão pode ter expirado.";
-            }
-        });
+                container.appendChild(card);
+            });
 
-        // Abrir imagem em tamanho real
-        tableBody.addEventListener("click", (event) => {
-            if (event.target.tagName === "IMG") {
-                modalImage.src = event.target.dataset.full;
-                modal.showModal();
-            }
-        });
+        } catch (error) {
+            errorBox.textContent =
+                "Erro ao consultar eventos. Sessão pode ter expirado.";
+        }
+    });
 
-        // Fechar modal ao clicar
-        modal.addEventListener("click", () => {
-            modal.close();
-        });
-    </script>
+    container.addEventListener("click", event => {
+        if (event.target.tagName === "IMG") {
+            modalImage.src = event.target.dataset.full;
+            modal.showModal();
+        }
+    });
+
+    modal.addEventListener("click", () => modal.close());
+</script>
 
 </body>
 </html>

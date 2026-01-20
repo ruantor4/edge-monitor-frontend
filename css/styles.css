@@ -1,86 +1,182 @@
 /* =========================================================
-   Edge Monitor – Estilos Globais
-   =========================================================
-   Arquitetura:
-   - Bootstrap: layout, grid, responsividade
-   - Este arquivo: identidade visual e ajustes finos
-   - Nenhuma lógica de UI deve existir aqui
-*/
+   Edge Monitor — Estilos Globais (ATUAL)
+   ========================================================= */
 
-/* -----------------------------
-   RESET SUAVE
------------------------------- */
+/* RESET SUAVE */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
 
 body {
-    background-color: #f4f6f9;
+    margin: 0;
+    background-color: #f5f7fb;
     color: #212529;
     font-family: system-ui, -apple-system, BlinkMacSystemFont,
                  "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
-
 /* =========================================================
-   LOGIN
+   LOGIN — PRESERVADO (INTACTO)
    ========================================================= */
 
 .login-container {
-    background-color: #f4f6f9;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: linear-gradient(
+        135deg,
+        #0d1b2a 0%,
+        #1b263b 60%,
+        #415a77 100%
+    );
+
+    padding: 1rem;
+}
+
+.login-container > * {
+    width: 100%;
+    max-width: 380px;
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    color: #ffffff;
+}
+
+.login-logo {
+    max-width: 64px;
+    margin-bottom: 0.75rem;
 }
 
 .login-header h1 {
+    font-size: 1.6rem;
     font-weight: 600;
-    color: #0d1b2a;
+    margin: 0;
 }
 
 .login-header p {
     font-size: 0.9rem;
-    color: #6c757d;
+    opacity: 0.85;
 }
 
 .login-form-section {
     background-color: #ffffff;
-    padding: 2rem;
-    border-radius: 0.75rem;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    padding: 1.75rem;
+    border-radius: 0.9rem;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.25);
 }
 
-.login-form-section .form-control {
-    padding: 0.6rem 0.75rem;
+.login-container .form-group {
+    margin-bottom: 1.1rem;
 }
 
-.login-form-section button {
-    padding: 0.6rem;
+.login-container label {
+    font-size: 0.85rem;
     font-weight: 500;
+    color: #495057;
+    margin-bottom: 0.25rem;
 }
 
+.login-container input {
+    width: 100%;
+    padding: 0.55rem 0.75rem;
+    border-radius: 0.45rem;
+    border: 1px solid #ced4da;
+    font-size: 0.9rem;
+}
+
+.login-container input:focus {
+    outline: none;
+    border-color: #415a77;
+    box-shadow: 0 0 0 2px rgba(65, 90, 119, 0.15);
+}
+
+.login-container button {
+    width: 100%;
+    padding: 0.6rem;
+    border-radius: 0.45rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+
+    background-color: #0d1b2a;
+    color: #ffffff;
+}
+
+.login-container button:hover {
+    background-color: #1b263b;
+}
+
+#login-error {
+    margin-top: 0.75rem;
+    font-size: 0.85rem;
+    color: #dc3545;
+    text-align: center;
+}
 
 /* =========================================================
    HEADER GLOBAL
    ========================================================= */
 
 .app-header {
-    background: linear-gradient(90deg, #0d1b2a, #1b263b);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0.75rem 2rem;
+
+    background: linear-gradient(135deg, #0d1b2a, #1b263b);
     color: #ffffff;
 }
 
 .app-header h1 {
+    margin: 0;
+    font-size: 1.1rem;
     font-weight: 600;
 }
 
-.app-header nav a.btn {
-    border-color: rgba(255, 255, 255, 0.5);
-    color: #ffffff;
+.app-header nav {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
-.app-header nav a.btn:hover {
-    background-color: #ffffff;
-    color: #0d1b2a;
+.app-header nav a {
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 500;
+    padding: 0.45rem 0.8rem;
+    border-radius: 0.45rem;
+    color: rgba(255,255,255,0.9);
 }
 
-.app-header nav button {
-    white-space: nowrap;
+.app-header nav a:hover {
+    background-color: rgba(255,255,255,0.15);
 }
 
+#logout-btn {
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 500;
+    padding: 0.45rem 0.8rem;
+    border-radius: 0.45rem;
+    color: #ffcccc;
+}
+
+#logout-btn:hover {
+    background-color: rgba(220,53,69,0.2);
+}
 
 /* =========================================================
    DASHBOARD
@@ -88,190 +184,346 @@ body {
 
 .dashboard-container {
     max-width: 1200px;
+    margin: 2rem auto 3rem auto;
+    padding: 0 1rem;
 }
 
-.filters-section {
+/* MÉTRICAS */
+
+.metrics-section .metric-card {
     background-color: #ffffff;
     padding: 1.25rem;
     border-radius: 0.75rem;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.06);
 }
 
-.filters-section h2 {
+.metric-card span {
+    font-size: 0.75rem;
     font-weight: 600;
-}
-
-.results-section h2 {
-    font-weight: 600;
-}
-
-.table {
-    background-color: #ffffff;
-    border-radius: 0.5rem;
-    overflow: hidden;
-}
-
-.table thead {
-    background-color: #f1f3f5;
-}
-
-.table th {
-    font-weight: 600;
-}
-
-.table td {
-    vertical-align: middle;
-}
-
-.results-section img {
-    border-radius: 6px;
-    transition: transform 0.2s ease;
-}
-
-.results-section img:hover {
-    transform: scale(1.05);
-}
-
-
-/* =========================================================
-   USERS – GESTÃO DE USUÁRIOS
-   ========================================================= */
-
-.users-container {
-    max-width: 1200px;
-}
-
-.page-header h1 {
-    font-weight: 600;
+    text-transform: uppercase;
     color: #0d1b2a;
 }
 
-.page-header p {
-    font-size: 0.9rem;
-    color: #6c757d;
+.metric-card strong {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #0d1b2a;
 }
 
-.page-actions a.btn {
-    white-space: nowrap;
-}
+/* FILTROS */
 
-
-/* -----------------------------
-   TABELA DE USUÁRIOS
------------------------------- */
-
-.users-list-section .table {
-    background-color: #ffffff;
-    border-radius: 0.5rem;
-    overflow: hidden;
-}
-
-.users-list-section thead {
-    background-color: #f1f3f5;
-}
-
-.users-list-section th {
-    font-weight: 600;
-}
-
-.users-list-section td {
-    vertical-align: middle;
-}
-
-.users-list-section td:last-child {
-    min-width: 160px;
-}
-
-
-/* -----------------------------
-   ESTADO VAZIO / ERRO
------------------------------- */
-
-#users-empty {
-    font-size: 0.95rem;
-}
-
-/* =========================================================
-   USER FORM – CRIAÇÃO / EDIÇÃO DE USUÁRIO
-   ========================================================= */
-
-.user-form-container {
-    max-width: 600px;
-}
-
-.user-form-section {
+.filters-section {
+    margin-top: 2rem;
     background-color: #ffffff;
     padding: 1.5rem;
     border-radius: 0.75rem;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    border-left: 5px solid #415a77;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.06);
 }
 
-.user-form-section .form-label {
+#filters-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: flex-end;
+}
+
+#filters-form label {
+    display: flex;
+    flex-direction: column;
+    font-size: 0.85rem;
     font-weight: 500;
+    color: #495057;
 }
 
-.user-form-section input {
-    padding: 0.55rem 0.75rem;
+#filters-form input {
+    min-width: 180px;
+    padding: 0.5rem 0.65rem;
+    border-radius: 0.45rem;
+    border: 1px solid #ced4da;
 }
 
-
-/* -----------------------------
-   CABEÇALHO DO FORMULÁRIO
------------------------------- */
-
-.user-form-container .page-header h1 {
-    font-weight: 600;
-    color: #0d1b2a;
+#filters-form button {
+    padding: 0.55rem 1.3rem;
+    border-radius: 0.45rem;
+    border: none;
+    background: linear-gradient(135deg, #0d1b2a, #1b263b);
+    color: #ffffff;
+    cursor: pointer;
 }
 
-.user-form-container .page-header p {
-    font-size: 0.9rem;
+#filters-error {
+    margin-top: 0.75rem;
+    font-size: 0.85rem;
+    color: #dc3545;
+}
+
+/* =========================================================
+   EVENTOS — QUADRADINHOS COM IMAGEM
+   ========================================================= */
+
+.events-list {
+    margin-top: 2rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.event-card {
+    background-color: #ffffff;
+    border-radius: 0.75rem;
+    padding: 0.6rem;
+
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+
+    box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+}
+
+/* IMAGEM */
+
+.event-image {
+    width: 100%;
+    height: 120px;
+    overflow: hidden;
+    border-radius: 0.45rem;
+}
+
+.event-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    cursor: zoom-in;
+
+    transition: transform 0.25s ease,
+                filter 0.25s ease;
+}
+
+.event-image:hover img {
+    transform: scale(1.08);
+    filter: brightness(1.1);
+}
+
+/* INFO */
+
+.event-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.event-info .badge {
+    align-self: flex-start;
+    font-size: 0.6rem;
+    padding: 0.25rem 0.45rem;
+}
+
+.event-mac {
+    font-family: monospace;
+    font-size: 0.7rem;
+    color: #495057;
+}
+
+.event-date {
+    font-size: 0.65rem;
     color: #6c757d;
 }
 
-
-/* -----------------------------
-   AÇÕES DO FORMULÁRIO
------------------------------- */
-
-.user-form-section .btn {
-    min-width: 110px;
-}
-
-
-/* -----------------------------
-   FEEDBACK / ERROS
------------------------------- */
-
-#form-error {
-    font-size: 0.9rem;
-}
 /* =========================================================
-   MODAL DE IMAGEM
+   MODAL
    ========================================================= */
 
 dialog#image-modal {
-    padding: 0;
     border: none;
+    padding: 0;
     background: transparent;
 }
 
 dialog#image-modal::backdrop {
-    background: rgba(0, 0, 0, 0.65);
+    background: rgba(13, 27, 42, 0.9);
 }
 
 #modal-image {
     max-width: 90vw;
     max-height: 90vh;
-    border-radius: 0.5rem;
+    border-radius: 0.75rem;
+}
+
+/* =========================================================
+   USERS — TABELA PROFISSIONAL (PADRÃO EDGE MONITOR)
+   ========================================================= */
+
+.users-table-section {
+    background-color: #ffffff;
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+
+    border-left: 5px solid #415a77;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+
+    overflow: hidden;
+}
+
+/* TÍTULO DA SEÇÃO */
+
+.users-table-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #0d1b2a;
+    margin-bottom: 0.10rem;
+}
+
+/* BOTÃO PRINCIPAL — IGUAL AO DASHBOARD */
+
+.btn-action {
+    padding: 0.55rem 1.3rem;
+    border-radius: 0.45rem;
+    border: none;
+
+    background: linear-gradient(135deg, #0d1b2a, #1b263b);
+    color: #ffffff;
+
+    font-size: 0.85rem;
+    font-weight: 500;
+
+    cursor: pointer;
+    transition: none;
+}
+
+.btn-action:hover,
+.btn-action:focus,
+.btn-action:active {
+    background: linear-gradient(135deg, #0d1b2a, #1b263b);
+    color: #ffffff;
+    box-shadow: none;
+    outline: none;
+}
+
+/* =========================
+   TABELA
+   ========================= */
+
+.users-card-header {
+    margin-top: 0rem;
+    margin-bottom: 0.80rem;
+}
+
+.users-table thead {
+    background: linear-gradient(0deg, #0d1b2a, #22314e);
+    color: #ffffff;
+}
+
+.users-table thead th {
+    background: transparent;
+    color: #ffffff;
+
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+
+    padding: 0.75rem;
+    border-bottom: none;
+}
+
+/* ===== AJUSTE FINO — ID ===== */
+
+.users-table thead th:first-child,
+.users-table tbody td:first-child {
+    padding-left: 2rem;
+}
+
+/* ===== AJUSTE FINO — AÇÕES ===== */
+.users-table thead th:last-child,
+.users-table tbody td:last-child {
+    width: 1%;
+    white-space: nowrap;
+    padding-right: 2rem; /* mantém respiro lateral */
+}
+
+/* ===== BOTÕES DE AÇÃO ===== */
+.users-table .actions-wrapper {
+    gap: 0.5rem;
+    align-items: right;
+}
+/* CANTOS ARREDONDADOS DO HEADER */
+
+.users-table thead th:first-child {
+    border-top-left-radius: 0.6rem;
+}
+
+.users-table thead th:last-child {
+    border-top-right-radius: 0.6rem;
+}
+
+/* =========================
+   LINHAS
+   ========================= */
+
+.users-table tbody td {
+    font-size: 0.85rem;
+    padding: 0.75rem;
+    border-top: 1px solid #f1f3f5;
+    vertical-align: middle;
+}
+
+.users-table tbody tr:hover {
+    background-color: #eef2f6;
+}
+
+/* =========================
+   BOTÕES DE AÇÃO
+   ========================= */
+
+.users-table .btn {
+    font-size: 0.75rem;
+    padding: 0.35rem 0.6rem;
+}
+
+.users-table .btn-outline-secondary {
+    color: #495057;
+    border-color: #29435c;
+}
+
+.users-table .btn-outline-secondary:hover {
+    background-color: #22314e;
+    color: #ffffff;
+}
+
+.users-table .btn-outline-danger {
+    color: #dc3545;
+    border-color: #f1aeb5;
+}
+
+.users-table .btn-outline-danger:hover {
+    background-color: #dc3545;
+    color: #ffffff;
 }
 
 
-/* =========================================================
-   FEEDBACK / ERROS
-   ========================================================= */
+/* =========================
+   ESTADO VAZIO
+   ========================= */
 
-#filters-error,
-#login-error {
-    font-size: 0.9rem;
+#users-empty {
+    font-size: 0.85rem;
+    color: #6c757d;
+}
+
+/* =========================
+   RESPONSIVO
+   ========================= */
+
+@media (max-width: 768px) {
+    .users-table-section {
+        padding: 1rem;
+    }
+
+    .users-table thead th,
+    .users-table tbody td {
+        font-size: 0.8rem;
+        padding: 0.6rem;
+    }
 }
