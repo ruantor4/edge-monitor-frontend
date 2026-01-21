@@ -17,9 +17,9 @@
 </head>
 <body>
 
-<!-- ======================================================
+<!-- 
      HEADER GLOBAL
-====================================================== -->
+-->
 <header class="app-header">
     <h1>Edge Monitor</h1>
 
@@ -30,9 +30,9 @@
     </nav>
 </header>
 
-<!-- ======================================================
+<!-- 
      CONTEÚDO PRINCIPAL
-====================================================== -->
+-->
 <main class="container dashboard-container">
 
     <!-- TÍTULO -->
@@ -43,9 +43,9 @@
         </p>
     </section>
 
-    <!-- ==================================================
+    <!-- 
          MÉTRICAS
-    =================================================== -->
+    -->
     <section class="metrics-section mb-4">
         <div class="row g-3">
             <div class="col-md-3">
@@ -78,9 +78,9 @@
         </div>
     </section>
 
-    <!-- ==================================================
+    <!-- 
          FILTROS
-    =================================================== -->
+    -->
     <section class="filters-section mb-4">
         <h3 class="h6 fw-semibold mb-3">Filtros</h3>
 
@@ -107,9 +107,9 @@
         <p id="filters-error" aria-live="polite"></p>
     </section>
 
-    <!-- ==================================================
+    <!-- 
          RESULTADOS
-    =================================================== -->
+    -->
     <section class="results-section">
         <h3 class="h6 fw-semibold mb-3">Ocorrências</h3>
 
@@ -118,16 +118,16 @@
 
 </main>
 
-<!-- ======================================================
+<!-- 
      MODAL DE IMAGEM
-====================================================== -->
+ -->
 <dialog id="image-modal">
     <img id="modal-image" alt="Evidência ampliada" />
 </dialog>
 
-<!-- ======================================================
+<!-- 
      SCRIPTS
-====================================================== -->
+ -->
 <script type="module">
     import { requireAuth } from "./js/guard.js";
     import { listDashboardEvents } from "./js/events.js";
