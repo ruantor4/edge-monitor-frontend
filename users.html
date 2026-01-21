@@ -17,25 +17,18 @@
 </head>
 <body>
 
-<!-- ======================================================
-     HEADER GLOBAL
-====================================================== -->
 <header class="app-header">
     <h1>Edge Monitor</h1>
 
-    <nav aria-label="Navegação principal">
+    <nav>
         <a href="dashboard.html">Dashboard</a>
         <a href="users.html">Usuários</a>
         <button id="logout-btn">Sair</button>
     </nav>
 </header>
 
-<!-- ======================================================
-     CONTEÚDO PRINCIPAL
-====================================================== -->
 <main class="dashboard-container">
 
-    <!-- CABEÇALHO -->
     <section class="mb-4">
         <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
             <div>
@@ -46,16 +39,17 @@
             </div>
 
             <div>
-                <a href="user-form.html" class="btn btn-action">
+                <a
+                    href="user-form.html"
+                    class="btn btn-action"
+                    id="btn-create-user"
+                >
                     Novo Usuário
                 </a>
             </div>
         </div>
     </section>
 
-    <!-- ==================================================
-         TABELA DE USUÁRIOS
-    =================================================== -->
     <section class="users-table-section">
 
         <div class="users-card-header">
@@ -69,25 +63,15 @@
                         <th>ID</th>
                         <th>Usuário</th>
                         <th>E-mail</th>
-                        <th>
-                            <div class="actions-wrapper">
-                                Ações
-                            </div>
-                        </th>
+                        <th class="text-end">Ações</th>
                     </tr>
                 </thead>
 
-                <tbody id="users-table-body">
-                    <!-- Linhas via JS -->
-                </tbody>
+                <tbody id="users-table-body"></tbody>
             </table>
         </div>
 
-        <p
-            id="users-empty"
-            class="text-muted mt-3"
-            hidden
-        >
+        <p id="users-empty" class="text-muted mt-3" hidden>
             Nenhum usuário encontrado.
         </p>
 
@@ -95,18 +79,28 @@
 
 </main>
 
-<!-- ======================================================
-     SCRIPT
-====================================================== -->
 <script type="module">
+    import { requireAuth } from "./js/guard.js";
     import { listUsers, deleteUser } from "./js/users.js";
     import { logout } from "./js/auth.js";
+
+    requireAuth();
 
     const tableBody = document.getElementById("users-table-body");
     const emptyMessage = document.getElementById("users-empty");
     const logoutBtn = document.getElementById("logout-btn");
+    const createBtn = document.getElementById("btn-create-user");
+
+    const isStaff = localStorage.getItem("is_staff") === "true";
+    const isSuperuser = localStorage.getItem("is_superuser") === "true";
+    const currentUserId = Number(localStorage.getItem("user_id"));
 
     logoutBtn.addEventListener("click", () => logout());
+
+    // Usuário comum não cria usuários
+    if (!isStaff && !isSuperuser) {
+        createBtn.remove();
+    }
 
     async function loadUsers() {
         try {
@@ -120,27 +114,42 @@
             users.forEach(user => {
                 const row = document.createElement("tr");
 
+                let actions = "-";
+
+                /**
+                 * REGRAS DE VISUALIZAÇÃO:
+                 * - Admin / Superuser: veem tudo
+                 * - Usuário comum: vê SOMENTE os próprios botões
+                 */
+                if (isSuperuser || isStaff || user.id === currentUserId) {
+                    actions = `
+                        <button
+                            class="btn btn-outline-secondary btn-sm"
+                            data-action="edit"
+                            data-id="${user.id}">
+                            Editar
+                        </button>
+
+                        <button
+                            class="btn btn-outline-danger btn-sm"
+                            data-action="delete"
+                            data-id="${user.id}">
+                            Excluir
+                        </button>
+                    `;
+                }
+
                 row.innerHTML = `
                     <td>${user.id}</td>
                     <td>${user.username}</td>
                     <td>${user.email || "-"}</td>
-                    <td>
-                        <div class="actions-wrapper">
-                            <a
-                                href="user-form.html?id=${user.id}"
-                                class="btn btn-outline-secondary btn-sm"
-                            >
-                                Editar
-                            </a>
-                            <button
-                                class="btn btn-outline-danger btn-sm"
-                                data-id="${user.id}"
-                            >
-                                Excluir
-                            </button>
+                    <td class="text-end">
+                        <div class="d-inline-flex gap-2">
+                            ${actions}
                         </div>
                     </td>
                 `;
+
                 tableBody.appendChild(row);
             });
 
@@ -151,17 +160,28 @@
     }
 
     tableBody.addEventListener("click", async (event) => {
-        const button = event.target;
-        if (!button.matches("button[data-id]")) return;
+        const button = event.target.closest("button[data-action]");
+        if (!button) return;
 
-        const userId = button.dataset.id;
-        if (!confirm("Deseja realmente excluir este usuário?")) return;
+        const userId = Number(button.dataset.id);
+        const action = button.dataset.action;
 
-        try {
-            await deleteUser(userId);
-            window.location.reload();
-        } catch {
-            alert("Erro ao excluir usuário");
+        // ===== EDITAR =====
+        if (action === "edit") {
+            window.location.href = `user-form.html?id=${userId}`;
+            return;
+        }
+
+        // ===== EXCLUIR =====
+        if (action === "delete") {
+            if (!confirm("Deseja realmente excluir este usuário?")) return;
+
+            try {
+                await deleteUser(userId);
+                window.location.reload();
+            } catch {
+                alert("Você não tem permissão para excluir este usuário.");
+            }
         }
     });
 

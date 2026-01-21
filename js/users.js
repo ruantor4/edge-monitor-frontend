@@ -31,6 +31,10 @@ import { apiGet, apiPost, apiPut, apiDelete } from "./api.js";
  *     Nome de usuário.
  * @property {string} email
  *     Endereço de e-mail do usuário.
+ * @property {boolean} [is_staff]
+ *     Indica se o usuário é administrador.
+ * @property {boolean} [is_superuser]
+ *     Indica se o usuário é superusuário (root).
  */
 
 
@@ -75,8 +79,6 @@ async function getUserById(userId) {
  * CRIAÇÃO
 */
 
-
-
 /**
  * Cria um novo usuário.
  *
@@ -111,16 +113,19 @@ async function createUser(data) {
  */
 
 /**
- * Atualiza um usuário existente.
+ * Atualiza parcialmente um usuário existente.
  *
  * Backend esperado:
  * PUT /api/user/{id}/
+ * (aceita atualização parcial conforme permissões do usuário autenticado)
  *
- * Payload aceito:
+ * Payload aceito (dependendo da permissão do usuário autenticado):
  * {
  *   username?: string,
  *   email?: string,
- *   password?: string
+ *   password?: string,
+ *   is_staff?: boolean,
+ *   is_superuser?: boolean
  * }
  *
  * @param {number} userId
@@ -165,4 +170,3 @@ export {
     updateUser,
     deleteUser,
 };
-
