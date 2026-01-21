@@ -129,9 +129,12 @@
      SCRIPTS
 ====================================================== -->
 <script type="module">
+    import { requireAuth } from "./js/guard.js";
     import { listDashboardEvents } from "./js/events.js";
     import { logout } from "./js/auth.js";
 
+    requireAuth();
+    
     const form = document.getElementById("filters-form");
     const errorBox = document.getElementById("filters-error");
     const container = document.getElementById("events-container");

@@ -6,200 +6,200 @@
 
     <title>Edge Monitor | Usuário</title>
 
-    <!-- BOOTSTRAP (BASE DE LAYOUT) -->
-    <link rel="stylesheet" href="css/bootstrap.min.css" />
-
-    <!-- ESTILOS GLOBAIS DO PROJETO -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    />
     <link rel="stylesheet" href="css/styles.css" />
 </head>
+
 <body>
 
-    <!--
-         CONTEÚDO PRINCIPAL
-    -->
-    <main class="user-form-container container my-4">
+<header class="app-header">
+    <h1>Edge Monitor</h1>
+    <nav>
+        <a href="dashboard.html">Dashboard</a>
+        <a href="users.html">Usuários</a>
+        <button id="logout-btn">Sair</button>
+    </nav>
+</header>
 
-        <!--
-             CABEÇALHO DA PÁGINA
-        -->
-        <header class="page-header mb-4">
-            <h1 id="page-title" class="h4 mb-1">
-                Novo Usuário
-            </h1>
-            <p
-                id="page-description"
-                class="text-muted mb-0"
-            >
-                Cadastro de usuário no sistema
-            </p>
-        </header>
+<main class="dashboard-container user-form-page">
 
-        <!--
-             FORMULÁRIO DE USUÁRIO
-        -->
-        <section class="user-form-section">
+    <section class="mb-4">
+        <h2 id="page-title" class="fw-semibold mb-1">Novo Usuário</h2>
+        <p id="page-subtitle" class="text-muted mb-0">
+            Cadastro de usuário no sistema
+        </p>
+    </section>
+
+    <section class="users-table-section">
+
+        <div class="users-card-header">Dados do usuário</div>
+
+        <div class="users-card-body">
+
             <form id="user-form" novalidate>
 
-                <div class="mb-3">
-                    <label for="username" class="form-label">
-                        Usuário
-                    </label>
-                    <input
-                        type="text"
-                        id="username"
-                        name="username"
-                        class="form-control"
-                        required
-                        autocomplete="username"
-                    />
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Usuário</label>
+                        <input type="text" name="username" class="form-control" required />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">E-mail</label>
+                        <input type="email" name="email" class="form-control" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">
+                            Senha
+                            <span id="password-hint" class="text-muted ms-1"></span>
+                        </label>
+                        <input type="password" name="password" class="form-control" />
+                    </div>
                 </div>
 
-                <div class="mb-3">
-                    <label for="email" class="form-label">
-                        E-mail
-                    </label>
-                    <input
-                        type="email"
-                        id="email"
-                        name="email"
-                        class="form-control"
-                        autocomplete="email"
-                    />
+                <div id="role-fields" class="mb-4">
+                    <label class="form-label fw-semibold">Tipo de conta</label>
+
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="is_staff" />
+                        <label class="form-check-label" for="is_staff">
+                            Administrador
+                        </label>
+                    </div>
+
+                    <div class="form-check" id="superuser-wrapper">
+                        <input class="form-check-input" type="checkbox" id="is_superuser" />
+                        <label class="form-check-label" for="is_superuser">
+                            Superusuário (Root)
+                        </label>
+                    </div>
                 </div>
 
-                <div class="mb-3">
-                    <label for="password" class="form-label">
-                        Senha
-                        <span
-                            id="password-hint"
-                            class="text-muted ms-1"
-                        ></span>
-                    </label>
-                    <input
-                        type="password"
-                        id="password"
-                        name="password"
-                        class="form-control"
-                        autocomplete="new-password"
-                    />
-                </div>
-
-                <!--
-                     MENSAGEM DE ERRO
-                -->
-                <div
-                    id="form-error"
-                    class="text-danger mb-3"
-                    aria-live="polite"
-                ></div>
-
-                <!--
-                     AÇÕES DO FORMULÁRIO
-                -->
-                <div class="d-flex gap-2">
-                    <button
-                        type="submit"
-                        class="btn btn-primary"
-                    >
-                        Salvar
-                    </button>
-
-                    <a
-                        href="users.html"
-                        class="btn btn-outline-secondary"
-                    >
-                        Cancelar
-                    </a>
+                <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+                    <a href="users.html" class="btn btn-outline-secondary">Cancelar</a>
+                    <button type="submit" class="btn btn-action">Salvar</button>
                 </div>
 
             </form>
-        </section>
+        </div>
+    </section>
+</main>
 
-    </main>
+<script type="module">
+    import { requireAuth } from "./js/guard.js";
+    import { logout } from "./js/auth.js";
+    import { createUser, updateUser, getUserById } from "./js/users.js";
 
-    <!--
-         SCRIPT DE CONTROLE DA TELA (UI)
-         - Apenas orquestra users.js
-    -->
-    <script type="module">
-        import {
-            createUser,
-            updateUser,
-            getUserById
-        } from "./js/users.js";
+    requireAuth();
 
-        const form = document.getElementById("user-form");
-        const errorBox = document.getElementById("form-error");
-        const title = document.getElementById("page-title");
-        const description = document.getElementById("page-description");
-        const passwordHint = document.getElementById("password-hint");
+    const form = document.getElementById("user-form");
+    const title = document.getElementById("page-title");
+    const subtitle = document.getElementById("page-subtitle");
+    const passwordHint = document.getElementById("password-hint");
+    const roleFields = document.getElementById("role-fields");
+    const superuserWrapper = document.getElementById("superuser-wrapper");
 
-        const params = new URLSearchParams(window.location.search);
-        const userId = params.get("id");
+    document.getElementById("logout-btn")
+        .addEventListener("click", () => logout());
 
-        /**
-         * Modo edição
-         */
-        if (userId) {
-            title.textContent = "Editar Usuário";
-            description.textContent =
-                "Atualização de dados do usuário";
-            passwordHint.textContent =
-                "(deixe em branco para manter a senha atual)";
+    const isStaff = localStorage.getItem("is_staff") === "true";
+    const isSuperuser = localStorage.getItem("is_superuser") === "true";
+    const currentUserId = Number(localStorage.getItem("user_id"));
 
-            loadUser(userId);
+    const params = new URLSearchParams(window.location.search);
+    const userId = params.get("id");
+
+    // Usuário comum não cria
+    if (!userId && !isStaff && !isSuperuser) {
+        window.location.href = "users.html";
+    }
+
+    if (userId) {
+        title.textContent = "Editar Usuário";
+        subtitle.textContent = "Atualização de dados do usuário";
+        passwordHint.textContent = "(deixe em branco para manter a senha atual)";
+        loadUser(userId);
+    } else {
+        // criação
+        if (!isSuperuser) {
+            superuserWrapper.remove();
         }
+    }
 
-        /**
-         * Carrega dados do usuário para edição
-         */
-        async function loadUser(id) {
-            try {
-                const user = await getUserById(id);
-                form.username.value = user.username;
-                form.email.value = user.email || "";
-            } catch (error) {
-                errorBox.textContent =
-                    "Erro ao carregar dados do usuário";
-            }
-        }
+    async function loadUser(id) {
+        try {
+            const user = await getUserById(id);
 
-        /**
-         * Submissão do formulário
-         */
-        form.addEventListener("submit", async (event) => {
-            event.preventDefault();
-            errorBox.textContent = "";
-
-            const payload = {
-                username: form.username.value.trim(),
-                email: form.email.value.trim() || undefined,
-            };
-
-            const password = form.password.value.trim();
-            if (password) {
-                payload.password = password;
+            if (!isStaff && !isSuperuser && user.id !== currentUserId) {
+                return window.location.href = "users.html";
             }
 
-            try {
-                if (userId) {
-                    await updateUser(userId, payload);
-                } else {
-                    if (!payload.password) {
-                        errorBox.textContent =
-                            "Senha é obrigatória para novo usuário";
-                        return;
-                    }
-                    await createUser(payload);
+            if (isStaff && !isSuperuser && user.is_superuser) {
+                return window.location.href = "users.html";
+            }
+
+            form.username.value = user.username;
+            form.email.value = user.email || "";
+
+            // ⚠️ MARCA PRIMEIRO
+            document.getElementById("is_staff").checked = Boolean(user.is_staff);
+            document.getElementById("is_superuser").checked = Boolean(user.is_superuser);
+
+            // ⚠️ DEPOIS REMOVE
+            if (!isSuperuser) {
+                superuserWrapper.remove();
+            }
+
+            if (!isStaff && !isSuperuser) {
+                roleFields.remove();
+            }
+
+        } catch {
+            alert("Erro ao carregar usuário");
+            window.location.href = "users.html";
+        }
+    }
+
+    form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        const payload = {
+            username: form.username.value.trim(),
+            email: form.email.value.trim() || undefined,
+        };
+
+        if (form.password.value.trim()) {
+            payload.password = form.password.value.trim();
+        }
+
+        if (isSuperuser) {
+            payload.is_staff = document.getElementById("is_staff").checked;
+            payload.is_superuser = document.getElementById("is_superuser").checked;
+        } else if (isStaff) {
+            payload.is_staff = document.getElementById("is_staff").checked;
+        }
+
+        try {
+            if (userId) {
+                await updateUser(userId, payload);
+            } else {
+                if (!payload.password) {
+                    alert("Senha é obrigatória");
+                    return;
                 }
-
-                window.location.href = "users.html";
-            } catch (error) {
-                errorBox.textContent =
-                    "Erro ao salvar usuário";
+                await createUser(payload);
             }
-        });
-    </script>
+
+            window.location.href = "users.html";
+        } catch {
+            alert("Erro ao salvar usuário ou permissão insuficiente");
+        }
+    });
+</script>
 
 </body>
 </html>

@@ -19,144 +19,69 @@
  * - O backend é a única fonte de verdade
  */
 
-
-// IMPORTAÇÃO DE CONFIG 
-
+/*
+    IMPORTAÇÃO DE CONFIG
+*/
 import { API_CONFIG } from "./config.js";
 
+/*
+    PERSISTÊNCIA DE TOKENS
+*/
 
-// PERSISTÊNCIA DE TOKENS
-
-/**
- * Persiste os tokens JWT no armazenamento local.
- *
- * @param {string} access
- *     Access token JWT utilizado para autenticação das requisições.
- *
- * @param {string} renovate
- *     Token de renovação (refresh) utilizado para gerar novos
- *     access tokens.
- *
- * @returns {void}
- */
 function saveToken(access, renovate) {
     localStorage.setItem(API_CONFIG.ACCESS_TOKEN_KEY, access);
     localStorage.setItem(API_CONFIG.RENOVATE_TOKEN_KEY, renovate);
 }
 
-
-/**
- * Atualiza apenas o access token armazenado.
- *
- * Utilizado após a renovação bem-sucedida do token.
- *
- * @param {string} access
- *     Novo access token JWT.
- *
- * @returns {void}
- */
 function updateAccessToken(access) {
     localStorage.setItem(API_CONFIG.ACCESS_TOKEN_KEY, access);
 }
 
-
-
-/**
- * Recupera o access token armazenado.
- *
- * @returns {string|null}
- *     Access token JWT ou null caso não exista.
- */
 function getAccessToken() {
     return localStorage.getItem(API_CONFIG.ACCESS_TOKEN_KEY);
 }
 
-
-
-/**
- * Recupera o renovate (refresh) token armazenado.
- *
- * Necessário para:
- * - Renovação do access token
- * - Logout real (blacklist no backend)
- *
- * @returns {string|null}
- *     Renovate token JWT ou null.
- */
 function getRenovateToken() {
     return localStorage.getItem(API_CONFIG.RENOVATE_TOKEN_KEY);
 }
 
+/*
+    AUTENTICAÇÃO
+*/
 
-// AUTENTICAÇÃO
-
-/**
- * Realiza o login do usuário na API.
- *
- * Envia credenciais para o backend e, em caso de sucesso,
- * armazena o par de tokens JWT retornados.
- *
- * Backend esperado:
- * POST /api/authentication/login/
- *
- * @param {string} username
- *     Nome de usuário.
- *
- * @param {string} password
- *     Senha do usuário.
- *
- * @throws {Error}
- *     Lançada quando as credenciais são inválidas ou ocorre
- *     falha de comunicação com o backend.
- *
- * @returns {Promise<void>}
- */
 async function login(username, password) {
     const response = await fetch(
         `${API_CONFIG.BASE_URL}/api/authentication/login/`,
         {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                username,
-                password,
-            }),
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username, password }),
         }
     );
 
-    if(!response.ok){
+    if (!response.ok) {
         throw new Error("Falha na autenticação");
     }
 
-    /** 
-    * @type {{access: string, renovate: string}} 
-    */
+    /**
+     * @type {{
+     *   access: string,
+     *   renovate: string,
+     *   is_staff: boolean,
+     *   is_superuser: boolean
+     * }}
+     */
     const data = await response.json();
 
     saveToken(data.access, data.renovate);
+
+    
+    localStorage.setItem("user_id", String(data.id));
+    localStorage.setItem("username", username);
+    localStorage.setItem("is_staff", String(data.is_staff));
+    localStorage.setItem("is_superuser", String(data.is_superuser));
 }
 
-
-
-/**
- * Renova o access token utilizando o renovate token.
- *
- * Backend esperado:
- * POST /api/authentication/renovate/
- *
- * Payload:
- * {
- *   renovate: string
- * }
- *
- * @throws {Error}
- *     Lançada quando o renovate token é inválido ou expirado.
- *
- * @returns {Promise<string>}
- *     Novo access token JWT.
- */
 async function renovateAccessToken() {
     const renovate = getRenovateToken();
 
@@ -168,9 +93,7 @@ async function renovateAccessToken() {
         `${API_CONFIG.BASE_URL}/api/authentication/renovate/`,
         {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ renovate }),
         }
     );
@@ -179,56 +102,23 @@ async function renovateAccessToken() {
         throw new Error("Falha ao renovar access token");
     }
 
-    /** @type {{access: string}} */
     const data = await response.json();
-
     updateAccessToken(data.access);
     return data.access;
 }
 
-
-/**
- * Garante que exista um access token válido para a sessão.
- *
- * Estratégia:
- * - Retorna o access token atual, se existir
- * - Caso contrário, tenta renová-lo via renovate token
- * - Em caso de falha, executa logout
- *
- * Esta função foi projetada para ser utilizada pela camada api.js
- * em cenários de resposta HTTP 401.
- *
- * @throws {Error}
- *     Lançada quando não é possível garantir uma sessão válida.
- *
- * @returns {Promise<string>}
- *     Access token válido.
- */
 async function ensureValidAccessToken() {
+    const access = getAccessToken();
+    if (access) return access;
+
     try {
-        return getAccessToken() || await renovateAccessToken();
-    } catch (error) {
+        return await renovateAccessToken();
+    } catch {
         await logout();
         throw new Error("Sessão expirada");
     }
 }
 
-
-
-
-/**
- * Realiza o logout do usuário.
- *
- * Responsabilidades:
- * - Invalida o renovate token no backend (blacklist)
- * - Remove tokens do armazenamento local
- * - Redireciona para a tela de login
- *
- * Backend esperado:
- * POST /api/authentication/logout/
- *
- * @returns {Promise<void>}
- */
 async function logout() {
     const renovate = getRenovateToken();
 
@@ -238,27 +128,67 @@ async function logout() {
                 `${API_CONFIG.BASE_URL}/api/authentication/logout/`,
                 {
                     method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
+                    headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ renovate }),
                 }
             );
-        } catch (error) {
-            // Falha no backend não impede encerramento da sessão local
+        } catch {
+            // Falha no backend não impede logout local
         }
     }
 
     localStorage.removeItem(API_CONFIG.ACCESS_TOKEN_KEY);
     localStorage.removeItem(API_CONFIG.RENOVATE_TOKEN_KEY);
+    localStorage.removeItem("user_id");
+    localStorage.removeItem("username");
+    localStorage.removeItem("is_staff");
+    localStorage.removeItem("is_superuser");
 
     window.location.href = "index.html";
 }
 
-
-/**
-* EXPORTAÇÃO EXPLÍCITA
+/*
+    RECUPERAÇÃO DE SENHA
 */
+
+async function requestPasswordReset(email) {
+    const response = await fetch(
+        `${API_CONFIG.BASE_URL}/api/authentication/password-reset/`,
+        {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email }),
+        }
+    );
+
+    if (!response.ok) {
+        throw new Error("Erro ao solicitar recuperação de senha");
+    }
+
+    return response.json();
+}
+
+async function confirmPasswordReset({ uid, token, password }) {
+    const response = await fetch(
+        `${API_CONFIG.BASE_URL}/api/authentication/password-reset/confirm/`,
+        {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ uid, token, password }),
+        }
+    );
+
+    if (!response.ok) {
+        throw new Error("Erro ao redefinir senha");
+    }
+
+    return response.json();
+}
+
+/*
+    EXPORTAÇÃO
+*/
+
 export {
     login,
     logout,
@@ -266,4 +196,6 @@ export {
     getRenovateToken,
     renovateAccessToken,
     ensureValidAccessToken,
+    requestPasswordReset,
+    confirmPasswordReset,
 };

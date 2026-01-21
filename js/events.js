@@ -5,19 +5,21 @@
  * de monitoramento no frontend do Edge Monitor.
  *
  * Este módulo encapsula exclusivamente:
- * - Consulta de eventos para visualização no dashboard
+ * - Consulta de eventos agregados para o dashboard
  * - Acesso opcional à lista bruta de eventos (monitoring)
  *
  * IMPORTANTE:
  * - Este módulo NÃO contém lógica de UI
  * - Este módulo NÃO constrói componentes visuais
- * - A filtragem por data é responsabilidade do endpoint /api/dashboard/
+ * - A filtragem por data é responsabilidade do backend
  */
 
 import { apiGet } from "./api.js";
 
 /**
  * Representa um evento retornado pelo dashboard.
+ *
+ * Estrutura esperada conforme serializer do backend.
  *
  * @typedef {Object} DashboardEvent
  * @property {string} mac
@@ -30,7 +32,9 @@ import { apiGet } from "./api.js";
  *     URL da imagem de evidência.
  */
 
-// DASHBOARD
+/* 
+   DASHBOARD
+*/
 
 /**
  * Lista eventos de monitoramento para o dashboard,
@@ -62,8 +66,9 @@ async function listDashboardEvents(startDate, endDate) {
     return apiGet(endpoint);
 }
 
-
-// MONITORING (ACESSO BRUTO / AUDITORIA)
+/*   
+    MONITORING (ACESSO BRUTO / AUDITORIA)
+*/
 
 /**
  * Lista eventos brutos de monitoramento.
@@ -73,7 +78,7 @@ async function listDashboardEvents(startDate, endDate) {
  *
  * IMPORTANTE:
  * - Este método NÃO aplica filtros
- * - Utilizado apenas para auditoria ou debug
+ * - Utilizado apenas para auditoria, debug ou telas técnicas
  *
  * @returns {Promise<Array>}
  *     Lista bruta de eventos de monitoramento.
@@ -82,9 +87,10 @@ async function listMonitoringEvents() {
     return apiGet("/api/monitoring/");
 }
 
-/*
-* EXPORTAÇÃO EXPLÍCITA
+/*   
+    EXPORTAÇÃO EXPLÍCITA
 */
+
 export {
     listDashboardEvents,
     listMonitoringEvents,

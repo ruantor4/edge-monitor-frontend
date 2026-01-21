@@ -44,7 +44,7 @@ body {
 
 .login-header {
     text-align: center;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1.75rem;
     color: #ffffff;
 }
 
@@ -54,7 +54,7 @@ body {
 }
 
 .login-header h1 {
-    font-size: 1.6rem;
+    font-size: 1.7rem;
     font-weight: 600;
     margin: 0;
 }
@@ -64,22 +64,26 @@ body {
     opacity: 0.85;
 }
 
+.login-form-section .mb-3 {
+    margin-bottom: 1rem;
+}
+
 .login-form-section {
     background-color: #ffffff;
-    padding: 1.75rem;
+    padding: 2rem 1.75rem;
     border-radius: 0.9rem;
     box-shadow: 0 12px 30px rgba(0,0,0,0.25);
 }
 
-.login-container .form-group {
-    margin-bottom: 1.1rem;
-}
 
 .login-container label {
-    font-size: 0.85rem;
-    font-weight: 500;
+    display: block;              /* garante separação correta */
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
     color: #495057;
-    margin-bottom: 0.25rem;
+    letter-spacing: 0.04em;
+    margin-bottom: 0.35rem;      /* espaço ideal label → input */
 }
 
 .login-container input {
@@ -117,6 +121,18 @@ body {
     font-size: 0.85rem;
     color: #dc3545;
     text-align: center;
+}
+
+.login-forgot-link {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #415a77;
+    text-decoration: none;
+}
+
+.login-forgot-link:hover {
+    text-decoration: underline;
+    color: #1b263b;
 }
 
 /* =========================================================
@@ -526,4 +542,31 @@ dialog#image-modal::backdrop {
         font-size: 0.8rem;
         padding: 0.6rem;
     }
+}
+
+/* =========================================================
+   USER FORM — PADRÃO ALINHADO AO USERS
+   ========================================================= */
+
+.user-form-page .users-card-body {
+    padding: 1.25rem 1.5rem 1.5rem 1.5rem;
+}
+
+/* labels iguais ao resto do sistema */
+.user-form-page .form-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: #495057;
+}
+
+/* inputs compactos, corporativos */
+.user-form-page .form-control {
+    height: 34px;
+    font-size: 0.85rem;
+    padding: 0.4rem 0.6rem;
+}
+
+.user-form-page form {
+    max-width: 920px;
 }

@@ -16,7 +16,6 @@
  * - A lógica de autenticação é delegada ao auth.js
  */
 
-
 import { API_CONFIG } from "./config.js";
 import {
     getAccessToken,
@@ -24,20 +23,22 @@ import {
     logout,
 } from "./auth.js";
 
-// FUNÇÃO BASE DE REQUISIÇÃO
+/* 
+   FUNÇÃO BASE DE REQUISIÇÃO
+*/
 
 /**
  * Executa uma requisição HTTP autenticada para a API.
  *
  * Estratégia:
- * - Anexa access token ao header Authorization
- * - Em caso de 401:
+ * - Anexa access token JWT ao header Authorization
+ * - Em caso de 401 (token expirado ou inválido):
  *     - tenta renovar o access token
  *     - repete a requisição uma única vez
  *     - se falhar, encerra a sessão
  *
  * @param {string} endpoint
- *     Endpoint relativo da API (ex: "/api/monitoring/")
+ *     Endpoint relativo da API (ex: "/api/user/")
  *
  * @param {RequestInit} options
  *     Opções adicionais do fetch (method, body, headers, etc).
@@ -50,14 +51,12 @@ import {
  *     Lançada em caso de erro HTTP ou falha de comunicação.
  *
  * @returns {Promise<any>}
- *     Retorna o JSON da resposta em caso de sucesso,
- *     ou null para respostas 204.
+ *     JSON da resposta em caso de sucesso,
+ *     ou null para respostas HTTP 204.
  */
 async function apiRequest(endpoint, options = {}, retry = true) {
-    /** @type {string|null} */
     let accessToken = getAccessToken();
 
-    /** @type {Record<string, string>} */
     const headers = {
         ...(options.headers || {}),
     };
@@ -75,13 +74,12 @@ async function apiRequest(endpoint, options = {}, retry = true) {
     );
 
     /**
-     * Access token expirado ou inválido
-     * → tenta renovar e repetir a requisição uma vez
+     * Token expirado ou inválido
+     * → tenta renovar e repetir a requisição uma única vez
      */
     if (response.status === 401 && retry) {
         try {
             accessToken = await ensureValidAccessToken();
-
             headers["Authorization"] = `Bearer ${accessToken}`;
 
             return apiRequest(endpoint, options, false);
@@ -91,6 +89,9 @@ async function apiRequest(endpoint, options = {}, retry = true) {
         }
     }
 
+    /**
+     * Erros HTTP tratados de forma centralizada
+     */
     if (!response.ok) {
         const errorText = await response.text();
         throw new Error(
@@ -98,7 +99,9 @@ async function apiRequest(endpoint, options = {}, retry = true) {
         );
     }
 
-    // Resposta sem conteúdo
+    /**
+     * Resposta sem conteúdo
+     */
     if (response.status === 204) {
         return null;
     }
@@ -106,11 +109,12 @@ async function apiRequest(endpoint, options = {}, retry = true) {
     return response.json();
 }
 
-
-// MÉTODOS HTTP
+/* 
+   MÉTODOS HTTP PADRONIZADOS
+*/
 
 /**
- * Realiza uma requisição GET autenticada.
+ * Executa uma requisição GET autenticada.
  *
  * @param {string} endpoint
  * @returns {Promise<any>}
@@ -121,10 +125,10 @@ function apiGet(endpoint) {
     });
 }
 
-
-
 /**
- * Realiza uma requisição POST autenticada.
+ * Executa uma requisição POST autenticada.
+ *
+ * Suporta envio de JSON ou FormData.
  *
  * @param {string} endpoint
  * @param {Object|FormData} data
@@ -142,10 +146,8 @@ function apiPost(endpoint, data) {
     });
 }
 
-
-
 /**
- * Realiza uma requisição PUT autenticada.
+ * Executa uma requisição PUT autenticada.
  *
  * @param {string} endpoint
  * @param {Object} data
@@ -161,9 +163,8 @@ function apiPut(endpoint, data) {
     });
 }
 
-
 /**
- * Realiza uma requisição DELETE autenticada.
+ * Executa uma requisição DELETE autenticada.
  *
  * @param {string} endpoint
  * @returns {Promise<any>}
@@ -174,9 +175,10 @@ function apiDelete(endpoint) {
     });
 }
 
-/**
-* EXPORTAÇÃO EXPLÍCITA
+/* 
+   EXPORTAÇÃO EXPLÍCITA
 */
+
 export {
     apiGet,
     apiPost,

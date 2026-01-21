@@ -72,6 +72,16 @@
                             />
                         </div>
 
+                        <!-- LINK ESQUECI MINHA SENHA -->
+                        <div class="mb-3 text-end">
+                            <a
+                                href="password-reset.html"
+                                class="login-forgot-link"
+                            >
+                                Esqueci minha senha
+                            </a>
+                        </div>
+
                         <!-- 
                             MENSAGEM DE ERRO 
                         -->
@@ -97,32 +107,35 @@
          SCRIPT DE CONTROLE DA TELA (UI)
          - Apenas orquestra a tela
     -->
-    <script type="module">
-        import { login } from "./js/auth.js";
+<script type="module">
+    import { login } from "./js/auth.js";
 
-        const form = document.getElementById("login-form");
-        const errorBox = document.getElementById("login-error");
+    const form = document.getElementById("login-form");
+    const errorBox = document.getElementById("login-error");
 
-        form.addEventListener("submit", async (event) => {
-            event.preventDefault();
-            errorBox.textContent = "";
+    form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        errorBox.textContent = "";
 
-            const username = form.username.value.trim();
-            const password = form.password.value.trim();
+        const username = form.username.value.trim();
+        const password = form.password.value.trim();
 
-            if (!username || !password) {
-                errorBox.textContent = "Usuário e senha são obrigatórios";
-                return;
-            }
+        if (!username || !password) {
+            errorBox.textContent = "Usuário e senha são obrigatórios";
+            return;
+        }
 
-            try {
-                await login(username, password);
-                window.location.href = "dashboard.html";
-            } catch (error) {
-                errorBox.textContent = "Credenciais inválidas";
-            }
-        });
-    </script>
+        try {
+            await login(username, password);
+            window.location.href = "dashboard.html";
+        } catch (error) {
+            errorBox.textContent = "Credenciais inválidas";
+
+            form.password.value = "";
+            form.password.focus();
+        }
+    });
+</script>
 
 </body>
 </html>
